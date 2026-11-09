@@ -56,7 +56,7 @@ public class PersonajesController(AppDbContext db, ApiService service) : Control
     {
         var personaje = await db.Personajes.Include(x => x.Cartas).FirstOrDefaultAsync(x => x.Id == id);
         if (personaje is null) return NotFound();
-        if (personaje.Cartas.Count > 0) return BadRequest(new { mensaje = "El personaje tiene cartas asociadas." });
+        if (personaje.Cartas.Count > 0) return Conflict(new { mensaje = "El personaje tiene cartas asociadas." });
         db.Remove(personaje);
         await db.SaveChangesAsync();
         return NoContent();

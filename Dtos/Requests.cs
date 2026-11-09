@@ -5,7 +5,7 @@ public record PersonajeRequest(
     [Required, StringLength(100)] string Nombre,
     [Required, StringLength(80)] string Faccion,
     bool EstaMuerto,
-    string? BiografiaSecreta);
+    [StringLength(1400)] string? BiografiaSecreta);
 
 public record CartaRequest(
     int PersonajeId,
@@ -21,4 +21,4 @@ public record UsuarioRequest(
     [Required] string Nombre,
     [Required, EmailAddress] string Email,
     [Required, MinLength(8)] string Password,
-    string? Telefono);
+    [StringLength(30)] string? Telefono);

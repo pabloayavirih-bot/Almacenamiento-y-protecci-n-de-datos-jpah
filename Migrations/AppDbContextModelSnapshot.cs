@@ -83,8 +83,7 @@ namespace FacciStats.Migrations
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("BiografiaSecreta")
-                        .HasMaxLength(2000)
-                        .HasColumnType("varchar(2000)");
+                        .HasColumnType("longtext");
 
                     b.Property<bool>("EstaMuerto")
                         .HasColumnType("tinyint(1)");

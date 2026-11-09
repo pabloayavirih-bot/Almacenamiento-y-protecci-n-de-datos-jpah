@@ -14,7 +14,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         {
             entity.Property(x => x.Nombre).HasMaxLength(100).IsRequired();
             entity.Property(x => x.Faccion).HasMaxLength(80).IsRequired();
-            entity.Property(x => x.BiografiaSecreta).HasMaxLength(2000);
+            entity.Property(x => x.BiografiaSecreta).HasColumnType("longtext");
         });
         modelBuilder.Entity<Carta>(entity =>
         {

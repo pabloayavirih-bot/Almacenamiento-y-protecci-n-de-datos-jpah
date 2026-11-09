@@ -12,8 +12,14 @@ GET {{baseUrl}}/facciones/comparar?faccionA=Orden%20Solar&faccionB=Alianza%20Lun
 ### Paginacion (200)
 GET {{baseUrl}}/facciones/Orden%20Solar/personajes?estado=todos&pagina=1&tamano=10
 
+### Faccion sin distinguir mayusculas y biografia descifrada (200)
+GET {{baseUrl}}/facciones/orden%20solar/personajes?estado=VIVOS&pagina=1&tamano=10
+
 ### Validacion (400)
 GET {{baseUrl}}/facciones/Orden%20Solar/personajes?estado=invalido
+
+### Ordenamiento invalido (400)
+GET {{baseUrl}}/facciones/estadisticas?ordenarPor=invalido
 
 ### Recurso inexistente (404)
 GET {{baseUrl}}/personajes/99999
