@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Guia completa de FacciStats</title>
+<style>
+@page { size: A4; margin: 18mm 16mm 18mm 16mm; }
+* { box-sizing: border-box; }
+body { color: #18212f; font-family: Arial, Helvetica, sans-serif; font-size: 10.2pt; line-height: 1.42; }
+h1, h2, h3 { color: #0b4f6c; page-break-after: avoid; }
+h1 { font-size: 28pt; line-height: 1.1; margin: 0 0 12px; }
+h2 { border-bottom: 2px solid #20a4b8; font-size: 18pt; margin: 26px 0 10px; padding-bottom: 4px; }
+h3 { font-size: 12.5pt; margin: 18px 0 6px; }
+p { margin: 6px 0; }
+ul, ol { margin: 6px 0 8px 22px; padding: 0; }
+li { margin: 3px 0; }
+table { border-collapse: collapse; font-size: 8.8pt; margin: 8px 0 13px; page-break-inside: auto; width: 100%; }
+thead { background: #0b4f6c; color: white; display: table-header-group; }
+tr { page-break-inside: avoid; }
+th, td { border: 1px solid #bdced6; padding: 6px; text-align: left; vertical-align: top; }
+tbody tr:nth-child(even) { background: #f1f7f8; }
+code { background: #eef3f5; border-radius: 3px; color: #8b2435; font-family: Consolas, monospace; font-size: 8.6pt; overflow-wrap: anywhere; padding: 1px 3px; }
+pre { background: #15232c; border-radius: 5px; color: #edf7fa; font-family: Consolas, monospace; font-size: 8.3pt; line-height: 1.35; overflow-wrap: anywhere; padding: 10px; white-space: pre-wrap; }
+.cover { border-left: 10px solid #20a4b8; display: flex; flex-direction: column; justify-content: center; min-height: 245mm; padding-left: 18px; }
+.subtitle { color: #38657a; font-size: 15pt; }
+.note { color: #4a5a63; margin-top: 30px; }
+.badge { background: #0b4f6c; border-radius: 3px; color: white; display: inline-block; font-size: 8.5pt; margin: 2px 3px 2px 0; padding: 4px 8px; }
+.path { color: #385767; overflow-wrap: anywhere; }
+.callout { background: #fff8df; border-left: 4px solid #efb738; margin: 10px 0; padding: 8px 10px; }
+.ok { background: #e7f6ed; border-left: 4px solid #32a05f; margin: 10px 0; padding: 8px 10px; }
+.pagebreak { page-break-before: always; }
+.small { color: #4d5c65; font-size: 8.5pt; }
+.flow { background: #f4fbfc; border: 1px solid #94cbd4; color: #0b4f6c; font-weight: bold; padding: 10px; text-align: center; }
+</style>
+</head>
+<body>
+<section class="cover">
+<div><span class="badge">ASP.NET Core</span><span class="badge">EF Core</span><span class="badge">MySQL</span><span class="badge">Seguridad</span></div>
+<h1>Guia completa de FacciStats API</h1>
+<p class="subtitle">Explicacion tecnica, paso a paso, para ejecutar, entender, probar y defender el proyecto.</p>
+<p><strong>Proyecto local:</strong><br><span class="path">C:\Users\caleb\OneDrive\Escritorio\TecWeb\pro3\TrabajoECU3\Almacenamiento-y-proteccion-de-datos-jpah</span></p>
+<p><strong>Repositorio remoto:</strong><br>https://github.com/pabloayavirih-bot/Almacenamiento-y-protecci-n-de-datos-jpah.git</p>
+<p class="note">Esta guia explica la version organizada por capas. No contiene contrasena de MySQL, cadena de conexion real ni clave AES: esos valores estan solo en Secret Manager local.</p>
+</section>
+<section class="pagebreak">
+<h2>Indice y proposito</h2>
+<ol><li>Que resuelve el proyecto.</li><li>Como abrir, configurar y ejecutar.</li><li>Mapa de carpetas y archivos.</li><li>Flujo interno de una peticion.</li><li>Modelo de datos y migraciones.</li><li>Proteccion de datos.</li><li>Todos los endpoints.</li><li>Estadisticas propias.</li><li>Pruebas, defensa y solucion de problemas.</li></ol>
+<div class="callout"><strong>Como usar la guia:</strong> cada seccion explica que hace una parte, por que existe y donde esta. Las rutas indicadas son relativas a la carpeta raiz del proyecto.</div>
+<h2>1. Que resuelve FacciStats</h2>
+<p><strong>FacciStats</strong> es una API REST para administrar personajes, cartas, eventos y usuarios de un catalogo galactico. Su funcionalidad propia transforma esos registros en estadisticas por faccion: personajes, vivos, muertos, cartas, poder promedio, eventos ganados y porcentaje de bajas.</p>
+<p>Una API no es una pagina web comun: recibe solicitudes HTTP, consulta o modifica MySQL y devuelve JSON. Swagger es la interfaz que documenta y permite probar cada operacion desde el navegador.</p>
+<table><thead><tr><th>Parte</th><th>Que aporta</th><th>Ubicacion</th></tr></thead><tbody>
+<tr><td>CRUD</td><td>Crear, leer, actualizar y eliminar personajes, cartas, eventos y usuarios.</td><td><code>Controllers/PersonajesController.cs</code>, <code>CartasController.cs</code>, <code>EventosController.cs</code>, <code>UsuariosController.cs</code>.</td></tr>
+<tr><td>Componente propio</td><td>Filtros, paginacion, ranking, comparacion y estadisticas por faccion.</td><td><code>Controllers/FaccionesController.cs</code> y <code>Services/ApiService.cs</code>, metodo <code>Estadisticas()</code>.</td></tr>
+<tr><td>Persistencia</td><td>Entidades almacenadas como tablas relacionales en MySQL.</td><td><code>Data/AppDbContext.cs</code> y <code>Migrations/</code>.</td></tr>
+<tr><td>Proteccion</td><td>Secretos fuera de Git, hash de contrasena y cifrado de datos sensibles.</td><td><code>Program.cs</code>, <code>Services/CifradoService.cs</code>, controladores de personajes y usuarios.</td></tr>
+</tbody></table>
+<h3>Conceptos esenciales</h3>
+<ul><li><strong>REST:</strong> una URL representa un recurso y el metodo HTTP expresa la accion: GET lee, POST crea, PUT actualiza y DELETE elimina.</li><li><strong>Endpoint:</strong> combinacion de metodo y ruta, por ejemplo <code>GET /api/v1/personajes</code>.</li><li><strong>JSON:</strong> formato estructurado de respuesta, por ejemplo <code>{"id":1,"nombre":"Astra"}</code>.</li><li><strong>Entidad:</strong> clase que Entity Framework Core convierte en tabla.</li><li><strong>DTO:</strong> objeto de entrada/salida que limita exactamente los datos que la API acepta o expone.</li><li><strong>DI:</strong> inyeccion de dependencias: ASP.NET entrega un servicio al controlador sin que este lo construya manualmente.</li></ul>
+</section>
+<section>
+<h2>2. Como abrir, configurar y ejecutar</h2>
+<h3>Requisitos</h3>
+<ul><li>.NET SDK 10 instalado: verifica con <code>dotnet --version</code>.</li><li>MySQL Server 8.0 activo en el puerto 3306. Este proyecto usa MySQL, no MariaDB ni XAMPP.</li><li>Base <code>facci_stats_db</code> y usuario de aplicacion creados localmente.</li><li>Paquetes restaurados con <code>dotnet restore</code> la primera vez.</li></ul>
+<h3>Ubicacion y secretos</h3>
+<pre>cd C:\Users\caleb\OneDrive\Escritorio\TecWeb\pro3\TrabajoECU3\Almacenamiento-y-proteccion-de-datos-jpah</pre>
+<p>En Git Bash se puede usar <code>cd ~/OneDrive/Escritorio/TecWeb/pro3/TrabajoECU3/Almacenamiento-y-proteccion-de-datos-jpah</code>. El identificador de Secret Manager esta en <code>FacciStats.csproj</code>, propiedad <code>UserSecretsId</code>. Desde la carpeta del proyecto se configuran valores privados:</p>
+<pre>dotnet user-secrets init&#10;dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=localhost;Port=3306;Database=facci_stats_db;User=facci_user;Password=TU_CLAVE"&#10;dotnet user-secrets set "Cifrado:Clave" "CLAVE_BASE64_DE_32_BYTES"</pre>
+<p>Para generar una clave AES valida en PowerShell: <code>$bytes = New-Object byte[] 32; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes); [Convert]::ToBase64String($bytes)</code>.</p>
+<div class="callout">No guardes valores reales en <code>appsettings.json</code>, capturas o Git. Ese archivo solo conserva Logging y AllowedHosts. <code>.gitignore</code> protege artefactos locales como <code>bin/</code> y <code>obj/</code>.</div>
+<h3>Migrar e iniciar</h3>
+<pre>dotnet ef database update</pre>
+<p>El comando recorre <code>Migrations/</code>, actualiza MySQL y registra lo aplicado en la tabla <code>__EFMigrationsHistory</code>.</p>
+<p>En PowerShell:</p><pre>$env:ASPNETCORE_ENVIRONMENT="Development"&#10;dotnet run</pre>
+<p>En Git Bash:</p><pre>ASPNETCORE_ENVIRONMENT=Development dotnet run</pre>
+<p>La sintaxis <code>$env:</code> es exclusiva de PowerShell; por eso falla en Git Bash. Abre luego <code>http://localhost:5000/swagger/index.html</code>, o el puerto que muestre la consola. Deten la API con <code>Ctrl + C</code>; despues de editar codigo debes iniciar otra vez.</p>
+</section>
+<section class="pagebreak">
+<h2>3. Mapa de carpetas y archivos</h2>
+<pre>Almacenamiento-y-proteccion-de-datos-jpah/&#10;|- Controllers/     Endpoints HTTP, uno por area&#10;|- Data/            AppDbContext y reglas de EF Core&#10;|- Dtos/            Requests y respuestas de la API&#10;|- Migrations/      Historial versionado del esquema MySQL&#10;|- Models/          Entidades convertidas en tablas&#10;|- Properties/      Perfil de lanzamiento local&#10;|- Services/        Cifrado y logica reutilizable&#10;|- docs/            Fuente HTML de esta guia&#10;|- output/pdf/      PDF final de esta guia&#10;|- Program.cs       Punto de arranque&#10;|- appsettings.json Configuracion no secreta&#10;|- FacciStats.csproj Paquetes, framework y User Secrets&#10;|- FacciStats.http  Solicitudes de ejemplo&#10;|- README.md        Instrucciones rapidas&#10;`- USO_DE_IA.md     Declaracion de uso puntual de IA</pre>
+<table><thead><tr><th>Archivo</th><th>Responsabilidad exacta</th></tr></thead><tbody>
+<tr><td><code>Program.cs</code></td><td>Construye la app, carga conexion, registra EF Core, controladores, Swagger, PasswordHasher, ApiService y CifradoService; al final mapea controladores y ejecuta.</td></tr>
+<tr><td><code>Models/Entities.cs</code></td><td>Declara <code>Personaje</code>, <code>Carta</code>, <code>Evento</code> y <code>Usuario</code>, sus campos y navegaciones.</td></tr>
+<tr><td><code>Data/AppDbContext.cs</code></td><td>Expone las tablas con <code>DbSet</code> y define longitudes, obligatorios, indice unico y relacion 1:N.</td></tr>
+<tr><td><code>Dtos/Requests.cs</code></td><td>Define entradas de POST/PUT y las anotaciones de validacion.</td></tr>
+<tr><td><code>Dtos/Responses.cs</code></td><td>Define <code>PersonajeDto</code> y <code>FaccionDto</code>, contratos de salida.</td></tr>
+<tr><td><code>Services/CifradoService.cs</code></td><td>Cifra y descifra texto con AES-GCM y una clave obtenida por configuracion.</td></tr>
+<tr><td><code>Services/ApiService.cs</code></td><td>Centraliza el mapeo/descifrado, estadisticas y creacion segura de usuario.</td></tr>
+<tr><td><code>Controllers/*.cs</code></td><td>Reciben HTTP, aplican reglas, consultan EF Core/servicios y eligen el estado HTTP.</td></tr>
+</tbody></table>
+<p>En <code>FacciStats.csproj</code>, <code>TargetFramework</code> define .NET 10; <code>Nullable</code> ayuda a detectar nulos; Pomelo es el proveedor que traduce EF Core a SQL para MySQL. Los otros paquetes habilitan herramientas EF, OpenAPI y Swagger UI.</p>
+</section>
+<section>
+<h2>4. Que ocurre en una peticion</h2>
+<div class="flow">Cliente o Swagger -&gt; Controller -&gt; Servicio cuando corresponde -&gt; AppDbContext / EF Core -&gt; MySQL -&gt; JSON y codigo HTTP</div>
+<ol><li>Swagger, un navegador o cliente HTTP envia una URL.</li><li>ASP.NET encuentra el controlador por <code>[Route(...)]</code> y el metodo por <code>[HttpGet]</code>, <code>[HttpPost]</code>, etc.</li><li>ASP.NET convierte el JSON a un Request DTO. <code>[ApiController]</code> hace que anotaciones como <code>[Required]</code> generen 400 cuando la entrada no es valida.</li><li>El controlador ejecuta reglas de negocio: una carta, por ejemplo, exige un personaje existente.</li><li>EF Core convierte operaciones LINQ en SQL y <code>AppDbContext</code> las ejecuta en MySQL.</li><li>Si hay texto sensible, <code>CifradoService</code> cifra antes de guardar o descifra antes de responder.</li><li>El resultado se serializa a JSON con un codigo HTTP adecuado.</li></ol>
+<h3>Ejemplo completo: POST de personaje</h3>
+<p>Se implementa en <code>Controllers/PersonajesController.cs</code>, metodo <code>Crear</code>. Recibe <code>PersonajeRequest</code>, aplica <code>Trim()</code> a nombre/faccion, cifra la biografia si existe, ejecuta <code>db.Add</code> y <code>SaveChangesAsync</code>. Luego responde 201 mediante <code>CreatedAtAction</code>, que ademas aporta la URL para consultar al nuevo recurso. Antes de responder llama <code>service.Map</code>, por lo que la biografia vuelve descifrada al cliente.</p>
+<p><code>AsNoTracking()</code> aparece en muchas lecturas. Significa que EF Core no vigilara cambios de esos objetos: es apropiado y mas liviano cuando solo se van a mostrar. Para editar se usa <code>FindAsync</code>, que entrega una entidad seguida por el contexto; <code>SaveChangesAsync</code> guarda las modificaciones.</p>
+<h2>5. Modelo de datos y migraciones</h2>
+<table><thead><tr><th>Entidad / tabla</th><th>Campos principales</th><th>Sentido</th></tr></thead><tbody>
+<tr><td><code>Personaje</code> / Personajes</td><td>Id, Nombre, Faccion, EstaMuerto, BiografiaSecreta</td><td>Personaje del catalogo. Biografia se guarda cifrada; el booleano permite contar vivos y muertos.</td></tr>
+<tr><td><code>Carta</code> / Cartas</td><td>Id, PersonajeId, Nombre, Poder</td><td>Carta de un personaje; su poder alimenta las estadisticas.</td></tr>
+<tr><td><code>Evento</code> / Eventos</td><td>Id, Nombre, Fecha, FaccionGanadora</td><td>Resultado para contar victorias por faccion.</td></tr>
+<tr><td><code>Usuario</code> / Usuarios</td><td>Id, Nombre, Email, PasswordHash, Telefono</td><td>Demuestra hash de password y cifrado de dato personal.</td></tr>
+</tbody></table>
+<p>Las cuatro clases estan en <code>Models/Entities.cs</code>. <code>""</code> evita nulos en texto requerido. El signo <code>?</code> significa que algo puede ser nulo, como <code>Telefono</code> o <code>BiografiaSecreta</code>.</p>
+<h3>Relacion uno a muchos</h3>
+<div class="flow">Un Personaje (1) &lt;--- tiene muchas ---&gt; Cartas (N)</div>
+<p>En <code>Personaje</code>, <code>List&lt;Carta&gt; Cartas</code> es la navegacion hacia sus cartas. En <code>Carta</code>, <code>PersonajeId</code> es llave foranea y <code>Personaje</code> navega al padre. En <code>Data/AppDbContext.cs</code>, dentro del bloque de Carta, <code>HasOne(...).WithMany(...).HasForeignKey(...).OnDelete(DeleteBehavior.Restrict)</code> establece la relacion. Restrict impide borrar un personaje que tiene cartas; el DELETE tambien lo detecta y responde 400.</p>
+<h3>Reglas de AppDbContext</h3>
+<p>El metodo <code>OnModelCreating</code> de <code>Data/AppDbContext.cs</code> fija maximos de longitud, obligatoriedad, email unico con <code>HasIndex(x =&gt; x.Email).IsUnique()</code>, password hash requerido y columnas de datos cifrados. Sus propiedades <code>DbSet</code> representan las tablas que EF Core administra.</p>
+<h3>Migraciones</h3>
+<table><thead><tr><th>Archivo</th><th>Que hace</th><th>Importancia</th></tr></thead><tbody>
+<tr><td><code>Migrations/20261109000100_Inicial.cs</code></td><td>Crea Personajes, Cartas, Eventos, Usuarios, indices y llave foranea.</td><td>Primera version reproducible del esquema.</td></tr>
+<tr><td><code>Migrations/20261109000200_AgregarBiografiaCifrada.cs</code></td><td>Agrega <code>BiografiaSecreta</code>.</td><td>Prueba que el modelo evoluciono mediante una migracion y no editando la BD a mano.</td></tr>
+<tr><td><code>Migrations/AppDbContextModelSnapshot.cs</code></td><td>Fotografia del modelo actual.</td><td>EF Core la compara al crear la siguiente migracion.</td></tr>
+</tbody></table>
+<p>Una migracion tiene <code>Up</code> para aplicar y <code>Down</code> para revertir. Se ejecutan en orden usando <code>dotnet ef database update</code>.</p>
+</section>
+<section class="pagebreak">
+<h2>6. Proteccion de datos, paso a paso</h2>
+<h3>Secret Manager</h3>
+<p>La cadena de conexion y clave AES no aparecen en el repositorio. En <code>Program.cs</code> se obtiene <code>ConnectionStrings:DefaultConnection</code>; si no existe, lanza una excepcion con una indicacion clara. User Secrets la proporciona en Development. <code>appsettings.json</code> solo conserva configuracion publica.</p>
+<h3>Hash de contrasena</h3>
+<p>La contrasena no se cifra: se transforma en un hash no reversible. <code>Program.cs</code> registra <code>IPasswordHasher&lt;Usuario&gt;</code> con <code>PasswordHasher&lt;Usuario&gt;</code>. En <code>Services/ApiService.cs</code>, metodo <code>CrearUsuario</code>, se ejecuta <code>usuario.PasswordHash = hasher.HashPassword(usuario, request.Password)</code>. En actualizacion, <code>UsuariosController.Editar</code> genera otro hash. El metodo privado <code>ADto</code> nunca devuelve password ni <code>PasswordHash</code>. En un futuro login se usaria <code>VerifyHashedPassword</code>.</p>
+<h3>Cifrado AES-GCM</h3>
+<p>Telefono y biografia se deben recuperar, por eso se cifran. <code>Services/CifradoService.cs</code> lee <code>Cifrado:Clave</code>, la decodifica desde Base64 y exige 32 bytes (AES-256). <code>Cifrar</code> genera un nonce aleatorio de 12 bytes, codifica el texto a UTF-8 y llama <code>AesGcm.Encrypt</code>. Guarda <code>nonce + tag de 16 bytes + texto cifrado</code> como Base64. <code>Descifrar</code> separa esos mismos segmentos y llama <code>AesGcm.Decrypt</code>; GCM verifica tambien que el contenido no fue alterado.</p>
+<p><strong>Uso exacto:</strong> <code>PersonajesController.Crear/Editar</code> cifra la biografia; <code>ApiService.Map</code> la descifra. <code>UsuariosController.Crear/Editar</code> cifra telefono; <code>UsuariosController.ADto</code> lo descifra para la respuesta.</p>
+<div class="ok"><strong>Demostracion en MySQL:</strong> PasswordHash, Telefono y BiografiaSecreta no contienen el texto original. <strong>Demostracion en GET:</strong> la API muestra telefono/biografia en claro despues de descifrarlos. Esta diferencia evidencia proteccion en reposo.</div>
+<h3>Validacion y reglas</h3>
+<ul><li><code>Dtos/Requests.cs</code> exige campos, longitud, email, password minimo de 8 caracteres y poder entre 0 y 100000.</li><li><code>UsuariosController</code> evita email repetido: 409 Conflict.</li><li><code>CartasController</code> exige personaje existente: 400 si falta.</li><li><code>FaccionesController.Personajes</code> controla pagina, tamano y estado.</li><li><code>PersonajesController.Eliminar</code> protege integridad cuando hay cartas.</li></ul>
+</section>
+<section>
+<h2>7. API completa: rutas, parametros y codigos HTTP</h2>
+<p>El prefijo comun es <code>/api/v1</code>. Las rutas se escriben en atributos <code>[Route]</code> dentro de <code>Controllers/</code>. Los cuerpos de POST y PUT se envian en JSON.</p>
+<h3>Personajes - <code>Controllers/PersonajesController.cs</code></h3>
+<table><thead><tr><th>Metodo y ruta</th><th>Entrada o comportamiento</th><th>Respuesta</th></tr></thead><tbody>
+<tr><td><code>GET /personajes</code></td><td>Lista por Id y aplica <code>service.Map</code> para descifrar biografias.</td><td>200, <code>{ data: [...] }</code>.</td></tr>
+<tr><td><code>GET /personajes/{id}</code></td><td>Busca por id entero.</td><td>200 o 404.</td></tr>
+<tr><td><code>POST /personajes</code></td><td><code>{ nombre, faccion, estaMuerto, biografiaSecreta }</code>.</td><td>201 Created; 400 si el DTO es invalido.</td></tr>
+<tr><td><code>PUT /personajes/{id}</code></td><td>Mismo cuerpo de POST; reemplaza datos y vuelve a cifrar biografia.</td><td>200, 404 o 400.</td></tr>
+<tr><td><code>DELETE /personajes/{id}</code></td><td>Elimina solo cuando no hay cartas asociadas.</td><td>204, 404 o 400 con mensaje.</td></tr>
+</tbody></table>
+<h3>Cartas - <code>Controllers/CartasController.cs</code></h3>
+<table><thead><tr><th>Ruta</th><th>Comportamiento</th><th>Estados</th></tr></thead><tbody>
+<tr><td><code>GET /cartas</code>, <code>GET /cartas/{id}</code></td><td>Incluye nombre del personaje con <code>Include(x =&gt; x.Personaje)</code>.</td><td>200; por id, 404 si falta.</td></tr>
+<tr><td><code>POST /cartas</code></td><td><code>{ personajeId, nombre, poder }</code>, valida personaje existente.</td><td>201, 400.</td></tr>
+<tr><td><code>PUT /cartas/{id}</code></td><td>Edita carta o reasigna a personaje valido.</td><td>200, 404, 400.</td></tr>
+<tr><td><code>DELETE /cartas/{id}</code></td><td>Elimina carta.</td><td>204 o 404.</td></tr>
+</tbody></table>
+<h3>Eventos - <code>Controllers/EventosController.cs</code></h3>
+<table><thead><tr><th>Ruta</th><th>Comportamiento</th><th>Estados</th></tr></thead><tbody>
+<tr><td><code>GET /eventos</code>, <code>GET /eventos/{id}</code></td><td>Lista por fecha descendente o busca por id.</td><td>200 / 404.</td></tr>
+<tr><td><code>POST /eventos</code></td><td><code>{ nombre, fecha, faccionGanadora }</code>.</td><td>201 / 400.</td></tr>
+<tr><td><code>PUT /eventos/{id}</code>, <code>DELETE /eventos/{id}</code></td><td>Edita o borra por id.</td><td>200, 204 o 404.</td></tr>
+</tbody></table>
+<h3>Usuarios - <code>Controllers/UsuariosController.cs</code></h3>
+<table><thead><tr><th>Ruta</th><th>Proteccion aplicada</th><th>Estados</th></tr></thead><tbody>
+<tr><td><code>GET /usuarios</code>, <code>GET /usuarios/{id}</code></td><td>Devuelven Id, nombre, email y telefono descifrado; no exponen PasswordHash.</td><td>200 / 404.</td></tr>
+<tr><td><code>POST /usuarios</code></td><td><code>{ nombre, email, password, telefono }</code>; normaliza email, hashea password, cifra telefono.</td><td>201, 400, 409 si email se repite.</td></tr>
+<tr><td><code>PUT /usuarios/{id}</code></td><td>Genera hash nuevo y cifra telefono nuevo.</td><td>200, 404, 400, 409.</td></tr>
+<tr><td><code>DELETE /usuarios/{id}</code></td><td>Elimina usuario.</td><td>204 o 404.</td></tr>
+</tbody></table>
+</section>
+<section class="pagebreak">
+<h2>8. Parte propia: Facciones y estadisticas</h2>
+<p>La logica de estas rutas vive en <code>Controllers/FaccionesController.cs</code>, reutilizando una sola fuente de calculo: <code>Services/ApiService.cs</code>, metodo <code>Estadisticas()</code>. Asi cada endpoint obtiene numeros consistentes.</p>
+<table><thead><tr><th>Ruta</th><th>Parametros</th><th>Que devuelve o valida</th></tr></thead><tbody>
+<tr><td><code>GET /facciones</code></td><td>-</td><td>Faccion y cantidad de personajes.</td></tr>
+<tr><td><code>GET /facciones/estadisticas</code></td><td><code>ordenarPor=poderPromedio</code>, <code>direccion=asc|desc</code></td><td>Todos los FaccionDto y orden opcional por promedio.</td></tr>
+<tr><td><code>GET /facciones/{nombre}/estadisticas</code></td><td>Nombre en ruta.</td><td>Una faccion sin distinguir mayusculas; 404 si no existe.</td></tr>
+<tr><td><code>GET /facciones/{nombre}/personajes</code></td><td><code>estado=todos|vivos|muertos</code>, <code>pagina</code>, <code>tamano</code>.</td><td>Lista filtrada y <code>meta</code>; pagina >= 1, tamano 1..50.</td></tr>
+<tr><td><code>GET /facciones/{nombre}/cartas</code></td><td><code>poderMinimo</code>, <code>orden=asc|desc</code>.</td><td>Cartas de los personajes de esa faccion.</td></tr>
+<tr><td><code>GET /facciones/{nombre}/eventos-ganados</code></td><td><code>desde</code>, <code>hasta</code> opcionales.</td><td>Eventos ganados, fecha descendente.</td></tr>
+<tr><td><code>GET /facciones/ranking</code></td><td><code>criterio=personajes|poderPromedio|eventosGanados</code>, <code>top=1..20</code>.</td><td>Posicion, faccion y valor; 400 si criterio/top no son validos.</td></tr>
+<tr><td><code>GET /facciones/comparar</code></td><td><code>faccionA</code>, <code>faccionB</code>.</td><td>Dos DTO y diferencias de personajes/eventos; 400 si nombres iguales, 404 si falta alguna.</td></tr>
+<tr><td><code>GET /estadisticas/generales</code></td><td>-</td><td>Totales de facciones, personajes, vivos, muertos, cartas y eventos. Esta en <code>EstadisticasController.cs</code>.</td></tr>
+</tbody></table>
+<h3>Lectura de <code>ApiService.Estadisticas()</code></h3>
+<ol><li>Carga personajes con cartas usando <code>Include(x =&gt; x.Cartas)</code> y carga eventos; ambos <code>AsNoTracking</code>.</li><li><code>GroupBy(x =&gt; x.Faccion.Trim(), StringComparer.OrdinalIgnoreCase)</code> agrupa por faccion, quitando espacios y sin importar mayusculas.</li><li><code>grupo.Count()</code> da personajes. Los dos Count sobre <code>EstaMuerto</code> dan vivos y muertos.</li><li><code>Sum(x =&gt; x.Cartas.Count)</code> suma cartas.</li><li><code>SelectMany(x =&gt; x.Cartas)</code> aplana listas; si hay cartas, <code>Average(x =&gt; x.Poder)</code> entrega el poder medio; si no, devuelve null.</li><li><code>eventos.Count(...)</code> cuenta ganadores por faccion.</li><li><code>Math.Round(muertos * 100.0 / total, 2)</code> da porcentaje con dos decimales; 100.0 obliga division decimal.</li><li><code>OrderBy(x =&gt; x.Faccion)</code> deja salida estable y legible.</li></ol>
+<pre>{&#10;  "faccion": "Orden Solar",&#10;  "personajes": 2, "vivos": 1, "muertos": 1,&#10;  "cartas": 2, "poderPromedio": 72.5,&#10;  "eventosGanados": 1, "porcentajeMuertos": 50.0&#10;}</pre>
+<p>El contrato se define en <code>Dtos/Responses.cs</code>, record <code>FaccionDto</code>.</p>
+</section>
+<section class="pagebreak">
+<h2>9. Pruebas y comprobaciones</h2>
+<h3>Datos de ejemplo y lectura de resultados</h3>
+<p>La base de prueba tiene personajes de Orden Solar y Alianza Lunar, cartas con poderes 80, 65 y 75, y eventos ganados por ambas facciones. Por eso Orden Solar resulta con 2 personajes, 1 vivo, 1 muerto, 2 cartas, promedio 72.5 y 1 evento ganado. Alianza Lunar resulta con 1 personaje vivo, 1 carta de poder 75 y 1 evento ganado. Los valores vienen de los registros, no estan escritos de forma fija en el controlador.</p>
+<table><thead><tr><th>Prueba</th><th>Como repetirla</th><th>Resultado esperado</th></tr></thead><tbody>
+<tr><td>Compilacion</td><td><code>dotnet build</code> o <code>dotnet run</code>.</td><td>Compila y arranca. NU1900 puede aparecer si la red no permite consultar auditoria NuGet; no bloquea paquetes ya restaurados.</td></tr>
+<tr><td>Migraciones</td><td><code>dotnet ef database update</code> y revisar MySQL.</td><td>Se aplican las dos migraciones y se registra el historial.</td></tr>
+<tr><td>Propuesta</td><td>En Swagger, ejecutar las nueve rutas de facciones/estadisticas.</td><td>200 con datos validos.</td></tr>
+<tr><td>Errores controlados</td><td>Usar <code>estado=invalido</code>, id inexistente y top fuera de rango.</td><td>400 por entrada invalida y 404 por recurso ausente.</td></tr>
+<tr><td>CRUD</td><td>Crear, consultar, editar y eliminar un registro temporal en cada recurso.</td><td>201, 200, 200 y 204, segun corresponda.</td></tr>
+<tr><td>Hash</td><td>Revisar <code>PasswordHash</code> en MySQL despues de crear usuario.</td><td>No coincide con el password enviado.</td></tr>
+<tr><td>Cifrado</td><td>Comparar Telefono/BiografiaSecreta de MySQL con un GET.</td><td>MySQL tiene Base64 cifrado; la API responde texto descifrado.</td></tr>
+</tbody></table>
+<h3>Prueba desde Swagger</h3>
+<ol><li>Abre <code>http://localhost:5000/swagger/index.html</code>.</li><li>Abre una ruta y pulsa <strong>Try it out</strong>.</li><li>Completa parametros o JSON. En usuarios usa email no repetido y password de minimo 8 caracteres.</li><li>Pulsa <strong>Execute</strong> y revisa Response Code, Response Body y URL.</li></ol>
+<p><code>FacciStats.http</code> contiene ejemplos listos para clientes compatibles: estadisticas, ranking, comparacion, paginacion, un 400, un 404 y resumen general.</p>
+<h3>Observacion directa en MySQL</h3>
+<pre>SELECT Id, Email, PasswordHash, Telefono FROM Usuarios;&#10;SELECT Id, Nombre, BiografiaSecreta FROM Personajes;</pre>
+<p>Estas consultas permiten demostrar almacenamiento protegido. No muestres claves ni contrasenas reales en una presentacion.</p>
+<h2>10. Guion para defender el trabajo</h2>
+<h3>Presentacion en orden</h3>
+<ol><li><strong>Problema:</strong> el sistema administra un catalogo y genera indicadores de facciones.</li><li><strong>Arquitectura:</strong> controladores reciben HTTP, servicios concentran logica, EF Core accede a MySQL y DTOs limitan entradas/salidas.</li><li><strong>Modelo:</strong> cuatro entidades y relacion uno-a-muchos Personaje-Carta.</li><li><strong>Evolucion:</strong> dos migraciones: inicial y agregado de biografia cifrada.</li><li><strong>Seguridad:</strong> secretos fuera de repo, hash de password, AES-GCM para texto recuperable.</li><li><strong>Aporte:</strong> estadisticas, filtros, paginacion, ranking y comparacion.</li><li><strong>Prueba:</strong> Swagger para caso correcto, 400/404 y MySQL para contrastar cifrado/hash.</li></ol>
+<table><thead><tr><th>Pregunta probable</th><th>Respuesta breve</th></tr></thead><tbody>
+<tr><td>Por que no guardar password normal?</td><td>Una password no debe recuperarse. PasswordHasher guarda un hash con salt y la API no devuelve PasswordHash.</td></tr>
+<tr><td>Por que cifrar telefono y no hashearlo?</td><td>Debe poder mostrarse de nuevo. AES-GCM permite descifrar con la clave; un hash no.</td></tr>
+<tr><td>Que aporta GCM?</td><td>Ademas de ocultar, la etiqueta de autenticacion detecta si el dato cifrado fue manipulado.</td></tr>
+<tr><td>Donde esta la clave?</td><td>En Secret Manager local, nunca en Git ni appsettings.json.</td></tr>
+<tr><td>Que hace una migracion?</td><td>Versiona el esquema: la primera crea tablas y la segunda agrega una columna; database update las aplica en orden.</td></tr>
+<tr><td>Como se relacionan Carta y Personaje?</td><td>Por PersonajeId, llave foranea configurada en AppDbContext.OnModelCreating y navegaciones de las entidades.</td></tr>
+<tr><td>Que diferencia hay entre 400, 404, 409 y 201?</td><td>400 solicitud invalida; 404 no existe; 409 conflicto como email repetido; 201 creado con URL del recurso.</td></tr>
+</tbody></table>
+<h3>Demostracion recomendada en cinco minutos</h3>
+<ol><li>Muestra el arbol de carpetas y sus capas.</li><li>En Swagger, ejecuta <code>GET /api/v1/facciones/estadisticas</code>.</li><li>Prueba filtro/paginacion: <code>estado=vivos&amp;pagina=1&amp;tamano=10</code>.</li><li>Ejecuta ranking y comparar dos facciones.</li><li>Prueba <code>estado=invalido</code> y un id inexistente.</li><li>Crea un dato temporal sensible, comprueba cifrado en MySQL y lectura descifrada por GET; borralo al terminar.</li></ol>
+</section>
+<section>
+<h2>11. Problemas frecuentes</h2>
+<table><thead><tr><th>Situacion</th><th>Causa</th><th>Solucion</th></tr></thead><tbody>
+<tr><td><code>command not found</code> con <code>$env:</code> en Git Bash</td><td>Sintaxis de PowerShell usada en Bash.</td><td>Usa <code>ASPNETCORE_ENVIRONMENT=Development dotnet run</code> o abre PowerShell.</td></tr>
+<tr><td><code>FacciStats.exe</code> bloqueado</td><td>Quedo una API anterior ejecutandose.</td><td>Ctrl+C en su consola o finaliza solo ese proceso en Administrador de tareas; vuelve a ejecutar.</td></tr>
+<tr><td>Error MySQL</td><td>Servicio detenido, puerto incorrecto o secreto ausente/incorrecto.</td><td>Inicia MySQL80, verifica 3306 y registra bien la cadena en User Secrets, sin publicarla.</td></tr>
+<tr><td><code>Configura ConnectionStrings...</code></td><td>Falta secreto de conexion.</td><td>Ejecuta <code>dotnet user-secrets set</code> en la carpeta del proyecto y reinicia.</td></tr>
+<tr><td><code>Configura Cifrado:Clave...</code></td><td>Falta clave o no mide 32 bytes.</td><td>Genera Base64 de 32 bytes. No cambies clave si debes leer datos anteriores.</td></tr>
+<tr><td><code>dotnet ef</code> no reconocido</td><td>Herramienta EF no instalada o sin PATH.</td><td>Instala/actualiza dotnet-ef para el usuario y repite.</td></tr>
+<tr><td>NU1900</td><td>Red no permite acceder a auditoria de NuGet.</td><td>No es error de codigo si restore/build finalizan; reintenta con Internet para auditoria.</td></tr>
+</tbody></table>
+<h2>12. Entrega y control final</h2>
+<ul><li>Ejecuta <code>git status</code>: no agregues <code>bin/</code>, <code>obj/</code>, secretos o bases locales.</li><li>Comprueba remoto con <code>git remote -v</code>.</li><li>Comprueba README, USO_DE_IA, migraciones y estructura de capas.</li><li>Antes de exponer, ejecuta build, migraciones y las rutas principales de Swagger.</li><li>Recuerda: claves y passwords son locales y privados; nunca se incluyen en capturas ni entregables.</li></ul>
+<p class="small"><strong>Ubicacion de fuente:</strong> <code>docs/GUIA_COMPLETA_FACCISTATS.html</code>. <strong>Ubicacion del resultado:</strong> <code>output/pdf/Guia_Completa_FacciStats.pdf</code>. Esta guia explica la estructura actual, pero no sustituye la ejecucion real de las pruebas.</p>
+</section>
+</body>
+</html>
