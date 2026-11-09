@@ -1,4 +1,34 @@
 using System.Security.Cryptography;
 using System.Text;
 namespace FacciStats;
-public class CifradoService { readonly byte[] key; public CifradoService(IConfiguration c) { key = Convert.FromBase64String(c["Cifrado:Clave"] ?? throw new InvalidOperationException("Configura Cifrado:Clave con Secret Manager.")); if (key.Length != 32) throw new InvalidOperationException("La clave AES debe tener 32 bytes en Base64."); } public string Cifrar(string text) { var n = RandomNumberGenerator.GetBytes(12); var plain = Encoding.UTF8.GetBytes(text); var encrypted = new byte[plain.Length]; var tag = new byte[16]; using var aes = new AesGcm(key, 16); aes.Encrypt(n, plain, encrypted, tag); return Convert.ToBase64String(n.Concat(tag).Concat(encrypted).ToArray()); } public string Descifrar(string value) { var all = Convert.FromBase64String(value); var output = new byte[all.Length - 28]; using var aes = new AesGcm(key, 16); aes.Decrypt(all[..12], all[28..], all[12..28], output); return Encoding.UTF8.GetString(output); } }
+
+public class CifradoService
+{
+    private readonly byte[] key;
+
+    public CifradoService(IConfiguration configuration)
+    {
+        key = Convert.FromBase64String(configuration["Cifrado:Clave"] ?? throw new InvalidOperationException("Configura Cifrado:Clave con Secret Manager."));
+        if (key.Length != 32) throw new InvalidOperationException("La clave AES debe tener 32 bytes en Base64.");
+    }
+
+    public string Cifrar(string text)
+    {
+        var nonce = RandomNumberGenerator.GetBytes(12);
+        var plain = Encoding.UTF8.GetBytes(text);
+        var encrypted = new byte[plain.Length];
+        var tag = new byte[16];
+        using var aes = new AesGcm(key, 16);
+        aes.Encrypt(nonce, plain, encrypted, tag);
+        return Convert.ToBase64String(nonce.Concat(tag).Concat(encrypted).ToArray());
+    }
+
+    public string Descifrar(string value)
+    {
+        var all = Convert.FromBase64String(value);
+        var output = new byte[all.Length - 28];
+        using var aes = new AesGcm(key, 16);
+        aes.Decrypt(all[..12], all[28..], all[12..28], output);
+        return Encoding.UTF8.GetString(output);
+    }
+}
