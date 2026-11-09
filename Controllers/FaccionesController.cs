@@ -39,9 +39,9 @@ public class FaccionesController(AppDbContext db, ApiService service) : Controll
         if (pagina < 1 || tamano is < 1 or > 50) return BadRequest(new { mensaje = "Paginación inválida." });
         var faccionNormalizada = nombre.Trim().ToUpper();
         var consulta = db.Personajes.AsNoTracking().Where(x => x.Faccion.Trim().ToUpper() == faccionNormalizada);
-        if (string.Equals(estado, "vivos", StringComparison.OrdinalIgnoreCase)) consulta = consulta.Where(x => !x.EstaMuerto);
-        else if (string.Equals(estado, "muertos", StringComparison.OrdinalIgnoreCase)) consulta = consulta.Where(x => x.EstaMuerto);
-        else if (!string.Equals(estado, "todos", StringComparison.OrdinalIgnoreCase)) return BadRequest(new { mensaje = "Estado inválido." });
+        if (string.Equals(estado, "vivos", StringComparison.OrdinalIgnoreCase) || string.Equals(estado, "vivo", StringComparison.OrdinalIgnoreCase)) consulta = consulta.Where(x => x.Estado == "vivo");
+        else if (string.Equals(estado, "muertos", StringComparison.OrdinalIgnoreCase) || string.Equals(estado, "muerto", StringComparison.OrdinalIgnoreCase)) consulta = consulta.Where(x => x.Estado == "muerto");
+        else if (!string.Equals(estado, "todos", StringComparison.OrdinalIgnoreCase)) return BadRequest(new { mensaje = "Estado inválido. Usa todos, vivos o muertos." });
         var total = await consulta.CountAsync();
         var personajes = await consulta.OrderBy(x => x.Id).Skip((pagina - 1) * tamano).Take(tamano).ToListAsync();
         return Ok(new { data = personajes.Select(service.Map), meta = new { pagina, tamano, total } });

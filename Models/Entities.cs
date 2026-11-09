@@ -4,9 +4,12 @@ public class Personaje
 {
     public int Id { get; set; }
     public string Nombre { get; set; } = "";
-    public string Faccion { get; set; } = "";
-    public bool EstaMuerto { get; set; }
-    public string? BiografiaSecreta { get; set; }
+    public string Especie { get; set; } = "";
+    public string Faccion { get; set; } = "Neutral";
+    public string Afiliacion { get; set; } = "";
+    public string Estado { get; set; } = "desconocido";
+    public bool FuerzaSensitivo { get; set; }
+    public string Image { get; set; } = "";
     public List<Carta> Cartas { get; set; } = [];
 }
 

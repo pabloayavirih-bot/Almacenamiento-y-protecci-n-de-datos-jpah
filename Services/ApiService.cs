@@ -11,14 +11,14 @@ public class ApiService(AppDbContext db, CifradoService cifrado, IPasswordHasher
         return personaje is null ? null : Map(personaje);
     }
 
-    public PersonajeDto Map(Personaje personaje) => new(personaje.Id, personaje.Nombre, personaje.Faccion, personaje.EstaMuerto, personaje.BiografiaSecreta is null ? null : cifrado.Descifrar(personaje.BiografiaSecreta));
+    public PersonajeDto Map(Personaje personaje) => new(personaje.Id, personaje.Nombre, personaje.Especie, personaje.Faccion, personaje.Afiliacion, personaje.Estado, personaje.FuerzaSensitivo, personaje.Image);
 
     public async Task<List<FaccionDto>> Estadisticas()
     {
         var personajes = await db.Personajes.Include(x => x.Cartas).AsNoTracking().ToListAsync();
         var eventos = await db.Eventos.AsNoTracking().ToListAsync();
         return personajes.GroupBy(x => x.Faccion.Trim(), StringComparer.OrdinalIgnoreCase)
-            .Select(grupo => new FaccionDto(grupo.Key, grupo.Count(), grupo.Count(x => !x.EstaMuerto), grupo.Count(x => x.EstaMuerto), grupo.Sum(x => x.Cartas.Count), grupo.SelectMany(x => x.Cartas).Any() ? grupo.SelectMany(x => x.Cartas).Average(x => x.Poder) : null, eventos.Count(x => string.Equals(x.FaccionGanadora, grupo.Key, StringComparison.OrdinalIgnoreCase)), Math.Round(grupo.Count(x => x.EstaMuerto) * 100.0 / grupo.Count(), 2)))
+            .Select(grupo => new FaccionDto(grupo.Key, grupo.Count(), grupo.Count(x => string.Equals(x.Estado, "vivo", StringComparison.OrdinalIgnoreCase)), grupo.Count(x => string.Equals(x.Estado, "muerto", StringComparison.OrdinalIgnoreCase)), grupo.Sum(x => x.Cartas.Count), grupo.SelectMany(x => x.Cartas).Any() ? grupo.SelectMany(x => x.Cartas).Average(x => x.Poder) : null, eventos.Count(x => string.Equals(x.FaccionGanadora, grupo.Key, StringComparison.OrdinalIgnoreCase)), Math.Round(grupo.Count(x => string.Equals(x.Estado, "muerto", StringComparison.OrdinalIgnoreCase)) * 100.0 / grupo.Count(), 2)))
             .OrderBy(x => x.Faccion).ToList();
     }
 

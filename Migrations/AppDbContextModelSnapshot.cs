@@ -46,6 +46,50 @@ namespace FacciStats.Migrations
                     b.HasIndex("PersonajeId");
 
                     b.ToTable("Cartas");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 101,
+                            Nombre = "Carta de Luke",
+                            PersonajeId = 101,
+                            Poder = 92
+                        },
+                        new
+                        {
+                            Id = 102,
+                            Nombre = "Carta de Vader",
+                            PersonajeId = 102,
+                            Poder = 95
+                        },
+                        new
+                        {
+                            Id = 103,
+                            Nombre = "Carta de Han",
+                            PersonajeId = 103,
+                            Poder = 76
+                        },
+                        new
+                        {
+                            Id = 104,
+                            Nombre = "Carta de Chewbacca",
+                            PersonajeId = 104,
+                            Poder = 82
+                        },
+                        new
+                        {
+                            Id = 105,
+                            Nombre = "Carta de Yoda",
+                            PersonajeId = 105,
+                            Poder = 98
+                        },
+                        new
+                        {
+                            Id = 106,
+                            Nombre = "Carta de Leia",
+                            PersonajeId = 106,
+                            Poder = 88
+                        });
                 });
 
             modelBuilder.Entity("FacciStats.Evento", b =>
@@ -72,6 +116,36 @@ namespace FacciStats.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Eventos");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 101,
+                            FaccionGanadora = "Rebelde",
+                            Fecha = new DateTime(2024, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Nombre = "Batalla de Yavin"
+                        },
+                        new
+                        {
+                            Id = 102,
+                            FaccionGanadora = "Imperio",
+                            Fecha = new DateTime(2024, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Nombre = "Batalla de Hoth"
+                        },
+                        new
+                        {
+                            Id = 103,
+                            FaccionGanadora = "Rebelde",
+                            Fecha = new DateTime(2024, 6, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Nombre = "Misión en Endor"
+                        },
+                        new
+                        {
+                            Id = 104,
+                            FaccionGanadora = "Neutral",
+                            Fecha = new DateTime(2024, 9, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Nombre = "Consejo de la Fuerza"
+                        });
                 });
 
             modelBuilder.Entity("FacciStats.Personaje", b =>
@@ -82,16 +156,35 @@ namespace FacciStats.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("BiografiaSecreta")
-                        .HasColumnType("longtext");
+                    b.Property<string>("Afiliacion")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("varchar(120)");
 
-                    b.Property<bool>("EstaMuerto")
-                        .HasColumnType("tinyint(1)");
+                    b.Property<string>("Especie")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("varchar(80)");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasDefaultValue("desconocido");
 
                     b.Property<string>("Faccion")
                         .IsRequired()
                         .HasMaxLength(80)
                         .HasColumnType("varchar(80)");
+
+                    b.Property<bool>("FuerzaSensitivo")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Image")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
@@ -101,6 +194,74 @@ namespace FacciStats.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Personajes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 101,
+                            Afiliacion = "Orden Jedi y Alianza Rebelde",
+                            Especie = "Humano",
+                            Estado = "vivo",
+                            Faccion = "Rebelde",
+                            FuerzaSensitivo = true,
+                            Image = "https://commons.wikimedia.org/wiki/Special:Redirect/file/SWCA_-_Luke_Skywalker_(16580421784).jpg?width=500",
+                            Nombre = "Luke Skywalker"
+                        },
+                        new
+                        {
+                            Id = 102,
+                            Afiliacion = "Imperio Galáctico",
+                            Especie = "Humano",
+                            Estado = "muerto",
+                            Faccion = "Imperio",
+                            FuerzaSensitivo = true,
+                            Image = "https://commons.wikimedia.org/wiki/Special:Redirect/file/Darth_Vader_at_Galaxy%E2%80%99s_Edge.jpg?width=500",
+                            Nombre = "Darth Vader"
+                        },
+                        new
+                        {
+                            Id = 103,
+                            Afiliacion = "Alianza Rebelde",
+                            Especie = "Humano",
+                            Estado = "vivo",
+                            Faccion = "Rebelde",
+                            FuerzaSensitivo = false,
+                            Image = "https://commons.wikimedia.org/wiki/Special:Redirect/file/Han_Solo_in_Carbonite_(31649435213).jpg?width=500",
+                            Nombre = "Han Solo"
+                        },
+                        new
+                        {
+                            Id = 104,
+                            Afiliacion = "Alianza Rebelde",
+                            Especie = "Wookiee",
+                            Estado = "vivo",
+                            Faccion = "Rebelde",
+                            FuerzaSensitivo = false,
+                            Image = "https://commons.wikimedia.org/wiki/Special:Redirect/file/Chewbacca_(7865110592).jpg?width=500",
+                            Nombre = "Chewbacca"
+                        },
+                        new
+                        {
+                            Id = 105,
+                            Afiliacion = "Orden Jedi",
+                            Especie = "Desconocida",
+                            Estado = "muerto",
+                            Faccion = "Neutral",
+                            FuerzaSensitivo = true,
+                            Image = "https://commons.wikimedia.org/wiki/Special:Redirect/file/Yoda_I_know_you%27re_in_there%21.jpg?width=500",
+                            Nombre = "Yoda"
+                        },
+                        new
+                        {
+                            Id = 106,
+                            Afiliacion = "Alianza Rebelde",
+                            Especie = "Humana",
+                            Estado = "vivo",
+                            Faccion = "Rebelde",
+                            FuerzaSensitivo = false,
+                            Image = "https://commons.wikimedia.org/wiki/Special:Redirect/file/Leia_Organa_Solo_Skywalker.jpg?width=500",
+                            Nombre = "Leia Organa"
+                        });
                 });
 
             modelBuilder.Entity("FacciStats.Usuario", b =>

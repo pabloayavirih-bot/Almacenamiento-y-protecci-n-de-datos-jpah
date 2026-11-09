@@ -16,8 +16,8 @@ public class EstadisticasController(AppDbContext db) : ControllerBase
             {
                 facciones = await db.Personajes.Select(x => x.Faccion).Distinct().CountAsync(),
                 personajes = await db.Personajes.CountAsync(),
-                vivos = await db.Personajes.CountAsync(x => !x.EstaMuerto),
-                muertos = await db.Personajes.CountAsync(x => x.EstaMuerto),
+                vivos = await db.Personajes.CountAsync(x => x.Estado == "vivo"),
+                muertos = await db.Personajes.CountAsync(x => x.Estado == "muerto"),
                 cartas = await db.Cartas.CountAsync(),
                 eventos = await db.Eventos.CountAsync()
             }

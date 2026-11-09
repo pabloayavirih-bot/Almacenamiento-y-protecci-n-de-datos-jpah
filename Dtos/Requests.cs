@@ -3,9 +3,12 @@ namespace FacciStats;
 
 public record PersonajeRequest(
     [Required, StringLength(100)] string Nombre,
+    [Required, StringLength(80)] string Especie,
     [Required, StringLength(80)] string Faccion,
-    bool EstaMuerto,
-    [StringLength(1400)] string? BiografiaSecreta);
+    [Required, StringLength(120)] string Afiliacion,
+    [Required, StringLength(20), RegularExpression("^(vivo|muerto|desconocido)$", ErrorMessage = "El estado debe ser vivo, muerto o desconocido.")] string Estado,
+    bool FuerzaSensitivo,
+    [Url, StringLength(500)] string? Image);
 
 public record CartaRequest(
     int PersonajeId,
@@ -19,6 +22,6 @@ public record EventoRequest(
 
 public record UsuarioRequest(
     [Required] string Nombre,
-    [Required, EmailAddress] string Email,
+    [Required, EmailAddress, StringLength(150)] string Email,
     [Required, MinLength(8)] string Password,
     [StringLength(30)] string? Telefono);

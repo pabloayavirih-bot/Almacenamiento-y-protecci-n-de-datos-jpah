@@ -45,9 +45,9 @@ La clave AES se genera en PowerShell con:
 $bytes = New-Object byte[] 32; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes); [Convert]::ToBase64String($bytes)
 ```
 
-No hay secretos en `appsettings.json`. Los usuarios guardan contraseñas como hash y el teléfono, igual que la biografía secreta del personaje, se cifra con AES-GCM en MySQL y se descifra únicamente al responder la API. Las migraciones `Inicial`, `AgregarBiografiaCifrada` y `AjustarCamposCifrados` crean y evolucionan el esquema.
+No hay secretos en `appsettings.json`. Los usuarios guardan contraseñas como hash y el teléfono se cifra con AES-GCM en MySQL y se descifra únicamente al responder la API. Las migraciones versionan cada cambio del esquema.
 
-La biografía de entrada se limita a 1400 caracteres y se almacena como `longtext`, porque AES-GCM más Base64 aumentan la longitud del texto original. El teléfono se limita a 30 caracteres antes de cifrarse.
+El personaje conserva la estructura trabajada en el catálogo galáctico anterior: nombre, especie, facción, afiliación, estado, sensibilidad a la Fuerza e imagen. Al aplicar la migración más reciente se cargan seis personajes, seis cartas y cuatro eventos de ejemplo.
 
 ## Comprobación antes de entregar
 
@@ -58,4 +58,4 @@ dotnet ef database update
 dotnet run
 ```
 
-En Swagger prueba un personaje con biografía y un usuario con teléfono. En MySQL los campos `BiografiaSecreta`, `Telefono` y `PasswordHash` no deben mostrar el texto original; las respuestas GET sí deben devolver los datos que la API descifra.
+En Swagger prueba un personaje y un usuario con teléfono. En MySQL los campos `Telefono` y `PasswordHash` no deben mostrar el texto original; las respuestas GET sí deben devolver el teléfono que la API descifra.

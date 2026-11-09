@@ -7,16 +7,46 @@ GET {{baseUrl}}/facciones/estadisticas
 GET {{baseUrl}}/facciones/ranking?criterio=poderPromedio&top=2
 
 ### Comparar (200)
-GET {{baseUrl}}/facciones/comparar?faccionA=Orden%20Solar&faccionB=Alianza%20Lunar
+GET {{baseUrl}}/facciones/comparar?faccionA=Rebelde&faccionB=Imperio
 
 ### Paginacion (200)
-GET {{baseUrl}}/facciones/Orden%20Solar/personajes?estado=todos&pagina=1&tamano=10
+GET {{baseUrl}}/facciones/Rebelde/personajes?estado=todos&pagina=1&tamano=10
 
-### Faccion sin distinguir mayusculas y biografia descifrada (200)
-GET {{baseUrl}}/facciones/orden%20solar/personajes?estado=VIVOS&pagina=1&tamano=10
+### Personajes de ejemplo del catálogo (200)
+GET {{baseUrl}}/personajes
+
+### Eventos de ejemplo del catálogo (200)
+GET {{baseUrl}}/eventos
+
+### Personajes rebeldes vivos (200)
+GET {{baseUrl}}/facciones/rebelde/personajes?estado=vivo&pagina=1&tamano=10
+
+### Crear un personaje de ejemplo (201)
+POST {{baseUrl}}/personajes
+Content-Type: application/json
+
+{
+  "nombre": "Ahsoka Tano",
+  "especie": "Togruta",
+  "faccion": "Neutral",
+  "afiliacion": "Ex Jedi",
+  "estado": "vivo",
+  "fuerzaSensitivo": true,
+  "image": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Ahsoka_Tano_costume.jpg?width=500"
+}
+
+### Crear un evento de ejemplo (201)
+POST {{baseUrl}}/eventos
+Content-Type: application/json
+
+{
+  "nombre": "Patrulla de Tatooine",
+  "fecha": "2024-11-20T00:00:00",
+  "faccionGanadora": "Neutral"
+}
 
 ### Validacion (400)
-GET {{baseUrl}}/facciones/Orden%20Solar/personajes?estado=invalido
+GET {{baseUrl}}/facciones/Rebelde/personajes?estado=invalido
 
 ### Ordenamiento invalido (400)
 GET {{baseUrl}}/facciones/estadisticas?ordenarPor=invalido

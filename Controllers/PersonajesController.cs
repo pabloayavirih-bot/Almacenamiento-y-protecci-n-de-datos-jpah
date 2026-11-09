@@ -24,13 +24,15 @@ public class PersonajesController(AppDbContext db, ApiService service) : Control
     [HttpPost]
     public async Task<IActionResult> Crear(PersonajeRequest request)
     {
-        var cifrado = HttpContext.RequestServices.GetRequiredService<CifradoService>();
         var personaje = new Personaje
         {
             Nombre = request.Nombre.Trim(),
+            Especie = request.Especie.Trim(),
             Faccion = request.Faccion.Trim(),
-            EstaMuerto = request.EstaMuerto,
-            BiografiaSecreta = string.IsNullOrWhiteSpace(request.BiografiaSecreta) ? null : cifrado.Cifrar(request.BiografiaSecreta)
+            Afiliacion = request.Afiliacion.Trim(),
+            Estado = request.Estado.Trim().ToLowerInvariant(),
+            FuerzaSensitivo = request.FuerzaSensitivo,
+            Image = request.Image?.Trim() ?? ""
         };
         db.Add(personaje);
         await db.SaveChangesAsync();
@@ -42,11 +44,13 @@ public class PersonajesController(AppDbContext db, ApiService service) : Control
     {
         var personaje = await db.Personajes.FindAsync(id);
         if (personaje is null) return NotFound();
-        var cifrado = HttpContext.RequestServices.GetRequiredService<CifradoService>();
         personaje.Nombre = request.Nombre.Trim();
+        personaje.Especie = request.Especie.Trim();
         personaje.Faccion = request.Faccion.Trim();
-        personaje.EstaMuerto = request.EstaMuerto;
-        personaje.BiografiaSecreta = string.IsNullOrWhiteSpace(request.BiografiaSecreta) ? null : cifrado.Cifrar(request.BiografiaSecreta);
+        personaje.Afiliacion = request.Afiliacion.Trim();
+        personaje.Estado = request.Estado.Trim().ToLowerInvariant();
+        personaje.FuerzaSensitivo = request.FuerzaSensitivo;
+        personaje.Image = request.Image?.Trim() ?? "";
         await db.SaveChangesAsync();
         return Ok(service.Map(personaje));
     }
