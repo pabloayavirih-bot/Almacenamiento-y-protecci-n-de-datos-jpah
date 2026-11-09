@@ -1,0 +1,22 @@
+@baseUrl = http://localhost:5000/api/v1
+
+### Estadisticas por faccion (200)
+GET {{baseUrl}}/facciones/estadisticas
+
+### Ranking (200)
+GET {{baseUrl}}/facciones/ranking?criterio=poderPromedio&top=2
+
+### Comparar (200)
+GET {{baseUrl}}/facciones/comparar?faccionA=Orden%20Solar&faccionB=Alianza%20Lunar
+
+### Paginacion (200)
+GET {{baseUrl}}/facciones/Orden%20Solar/personajes?estado=todos&pagina=1&tamano=10
+
+### Validacion (400)
+GET {{baseUrl}}/facciones/Orden%20Solar/personajes?estado=invalido
+
+### Recurso inexistente (404)
+GET {{baseUrl}}/personajes/99999
+
+### Resumen general (200)
+GET {{baseUrl}}/estadisticas/generales
