@@ -2,6 +2,23 @@
 
 API REST en ASP.NET Core para personajes, cartas, eventos y estadísticas por facción. Cumple la propuesta mediante los endpoints `/api/v1/facciones` y `/api/v1/estadisticas/generales`; incluye filtros, ranking, comparación y paginación.
 
+## Estructura
+
+```text
+FacciStats/
+├── Controllers/   # Endpoints de la API
+├── Data/          # AppDbContext y configuración EF Core
+├── Dtos/          # Requests y respuestas de la API
+├── Migrations/    # Historial de cambios de MySQL
+├── Models/        # Personaje, Carta, Evento y Usuario
+├── Properties/    # Perfil de ejecución local
+├── Services/      # Cifrado AES-GCM y estadísticas
+├── FacciStats.http
+├── Program.cs
+├── README.md
+└── USO_DE_IA.md
+```
+
 ## Preparación
 
 Crear la base y usuario MySQL, luego ejecutar:
